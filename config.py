@@ -66,8 +66,20 @@ def get_embeddings():
 
     # Los modelos E5 esperan el prefijo "passage: " en los documentos y "query: " en las
     # preguntas. Los vectores se normalizan para usar similitud coseno.
-    return HuggingFaceEmbeddings(
-        model_name=EMBEDDING_MODEL,
-        encode_kwargs={"normalize_embeddings": True, "prompt": "passage: "},
-        query_encode_kwargs={"normalize_embeddings": True, "prompt": "query: "},
-    )
+    def cargar(solo_local: bool):
+        return HuggingFaceEmbeddings(
+            model_name=EMBEDDING_MODEL,
+            model_kwargs={"local_files_only": solo_local},
+            encode_kwargs={"normalize_embeddings": True, "prompt": "passage: "},
+            query_encode_kwargs={"normalize_embeddings": True, "prompt": "query: "},
+        )
+
+    # Si el modelo ya está en la caché local se carga sin conectarse a HuggingFace
+    # (ahorra varios segundos por ejecución); solo la primera vez se descarga.
+    try:
+        return cargar(solo_local=True)
+    except OSError:
+        logging.getLogger("config").info(
+            f"Descargando el modelo de embeddings {EMBEDDING_MODEL} (solo la primera vez)..."
+        )
+        return cargar(solo_local=False)
