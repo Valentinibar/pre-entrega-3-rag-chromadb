@@ -1,0 +1,11 @@
+langchain
+langchain-core
+langchain-text-splitters
+langchain-anthropic
+langchain-chroma
+langchain-huggingface
+sentence-transformers
+chromadb
+tiktoken
+pydantic
+python-dotenv
